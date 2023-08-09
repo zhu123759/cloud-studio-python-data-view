@@ -1,0 +1,165 @@
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Python Web Demo | Cloud Studio</title>
+    <style>
+        body {
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            font-family: "PingFang SC", "Helvetica Neue", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", 微软雅黑, sans-serif;
+            font-size: 16px;
+        }
+
+        .container {
+            width: 100%;
+            text-align: center;
+        }
+
+        .cover {
+            width: 100%;
+            background-color: #1E1E1E;
+            color: #fff;
+            padding-top: 100px;
+            display: block;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            display: flex;
+        }
+
+        @media (max-width: 400px) {
+            .header {
+                padding: 24px 12px;
+            }
+        }
+
+        .cover h1 {
+            font-size: 60;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+    </style>
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.2/echarts.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="cover">
+        <div class="header">
+            <img alt="Cloud Studio" height="30px;"
+                 src="https://cs-res.codehub.cn/cloudstudio-home/images/menu/cs-logo.png"
+                 />
+        </div>
+    </div>
+    <div id="main" style="width: 1200px; height: 800px; margin: 0 auto"></div>
+</div>
+<script type="text/javascript">
+    let myChart = echarts.init(document.getElementById('main'));
+    let dataX = [];  
+    let dataTemp = [];  
+    let dataFeelsLike = [];  
+    let dataHumidity = [];  
+    let dataWindSpeed = [];  
+
+    function fetchDataAndUpdateChart() {
+        // 如不工作，此处替换API KEY
+        const API_URL = 'https://api.openweathermap.org/data/2.5/weather?lat=40.7128&lon=-74.0060&units=metric&appid=a36f2258e0dfa67b4e2ec2dc19cdc4c7&lang=zh_cn';
+        
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                let currentTime = new Date(data.dt * 1000).toLocaleTimeString();
+                dataX.push(currentTime);
+                dataTemp.push(data.main.temp);
+                dataFeelsLike.push(data.main.feels_like);
+                dataHumidity.push(data.main.humidity);
+                dataWindSpeed.push(data.wind.speed);
+
+                if (dataX.length > 10) {
+                    dataX.shift();
+                    dataTemp.shift();
+                    dataFeelsLike.shift();
+                    dataHumidity.shift();
+                    dataWindSpeed.shift();
+                }
+
+                let option = {
+                    title: {
+                        text: 'Weather Data in ' + data.name
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['温度', '体感', '湿度', '风速']
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: dataX
+                    },
+                    yAxis: [
+                        {
+                            type: 'value',
+                            name: '温度 (°C)'
+                        },
+                        {
+                            type: 'value',
+                            name: '风速 (m/s)',
+                            position: 'right'
+                        },
+                        {
+                            type: 'value',
+                            name: '湿度 (%)',
+                            position: 'right',
+                            offset: 80
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '温度',
+                            type: 'line',
+                            data: dataTemp
+                        },
+                        {
+                            name: '体感',
+                            type: 'line',
+                            data: dataFeelsLike
+                        },
+                        {
+                            name: '湿度',
+                            type: 'line',
+                            yAxisIndex: 2,
+                            data: dataHumidity
+                        },
+                        {
+                            name: '风速',
+                            type: 'line',
+                            yAxisIndex: 1,
+                            data: dataWindSpeed
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+    }
+
+    // 初始加载数据并设置图表
+    fetchDataAndUpdateChart();
+
+    // 每分钟刷新一次数据
+    setInterval(fetchDataAndUpdateChart, 60000);
+
+</script>
+</body>
+</html>

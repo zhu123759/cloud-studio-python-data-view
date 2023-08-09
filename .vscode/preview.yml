@@ -1,0 +1,10 @@
+# .vscode/preview.yml
+autoOpen: true # 打开工作空间时是否自动开启所有应用的预览
+apps:
+  - port: 5000 # 应用的端口
+    run: pip install -i https://mirrors.tencent.com/pypi/simple/ -r ./requirements.txt && bash /usr/bin/start-vnc-session.sh && python ./app.py # 应用启动命令
+    root: ./web # 应用的启动目录
+    name: Python Web Data View # 应用名称
+    description: Python Cloud Studio To Show Weather Data In Chart # 应用描述
+    autoOpen: true # 打开工作空间时是否自动运行命令（优先级高于根级 autoOpen）
+    autoPreview: true # 是否自动打开预览, 若无则默认为true
